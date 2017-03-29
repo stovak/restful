@@ -139,8 +139,14 @@ function restful_uninstall() {
  * Create the cache fragments schema.
  */
 function restful_update_7200() {
-  $table_schema = drupal_get_schema('restful_cache_fragment', TRUE);
-  db_create_table('restful_cache_fragment', $table_schema);
+  if (!db_table_exists('restful_cache_fragment')) {
+    $table_schema = drupal_get_schema('restful_cache_fragment', TRUE);
+    db_create_table('restful_cache_fragment', $table_schema);
+  }
+  if (!db_table_exists('restful_rate_limit')) {
+    $table_schema = restful_schema();
+    db_create_table('restful_rate_limit', $table_schema['restful_rate_limit']);
+  }
 }
 
 /**
@@ -150,4 +156,16 @@ function restful_update_7201() {
   // Even if the recommended value is FALSE, there might be some deploy
   // workflows that assume cache clearing.
   variable_set('restful_clear_on_cc_all', TRUE);
+}
+
+
+function restful_enable() {
+  if (!db_table_exists('restful_cache_fragment')) {
+    $table_schema = restful_schema();
+    db_create_table('restful_cache_fragment', $table_schema['restful_cache_fragment']);
+  }
+  if (!db_table_exists('restful_rate_limit')) {
+    $table_schema = restful_schema();
+    db_create_table('restful_rate_limit', $table_schema['restful_rate_limit']);
+  }
 }
